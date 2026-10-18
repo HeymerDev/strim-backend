@@ -1,0 +1,96 @@
+# Pruebas manuales de la API de Strim (D6).
+# Con la extensión REST Client de VS Code: "Send Request" encima de cada petición.
+# Los tokens se toman solos de la respuesta de login / verify-email.
+
+@baseUrl = http://localhost:4000/api
+@email = tu-correo@ejemplo.com
+@password = Strim12345
+@newPassword = Strim67890
+@username = streamer1
+@otp = 123456
+
+### Salud
+GET {{baseUrl}}/health
+
+# ───────────── Cuentas (Fase 2) ─────────────
+
+### Registro (RF-01): envía el OTP al correo
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{ "email": "{{email}}", "username": "{{username}}", "password": "{{password}}" }
+
+### Reenviar el OTP (RF-02.3)
+POST {{baseUrl}}/auth/resend-otp
+Content-Type: application/json
+
+{ "email": "{{email}}" }
+
+### Verificar el correo con el OTP (RF-02): pon el código en @otp
+# @name verify
+POST {{baseUrl}}/auth/verify-email
+Content-Type: application/json
+
+{ "email": "{{email}}", "otp": "{{otp}}" }
+
+### Login (RF-03)
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "email": "{{email}}", "password": "{{password}}" }
+
+@accessToken = {{login.response.body.accessToken}}
+@refreshToken = {{login.response.body.refreshToken}}
+
+### Renovar tokens (RF-04.3)
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{ "refreshToken": "{{refreshToken}}" }
+
+### Mis datos (RF-04.5)
+GET {{baseUrl}}/me
+Authorization: Bearer {{accessToken}}
+
+### Editar perfil (RF-06)
+PATCH {{baseUrl}}/me
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "displayName": "Streamer Uno", "bio": "Hola, transmito los viernes." }
+
+### Subir avatar (RF-06.4): pon una imagen avatar.png junto a este archivo
+PUT {{baseUrl}}/me/avatar
+Authorization: Bearer {{accessToken}}
+Content-Type: multipart/form-data; boundary=StrimBoundary
+
+--StrimBoundary
+Content-Disposition: form-data; name="avatar"; filename="avatar.png"
+Content-Type: image/png
+
+< ./avatar.png
+--StrimBoundary--
+
+### Cambiar contraseña (RF-07)
+PUT {{baseUrl}}/me/password
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "currentPassword": "{{password}}", "newPassword": "{{newPassword}}" }
+
+### Pedir código para recuperar la contraseña (RF-05.1)
+POST {{baseUrl}}/auth/password/forgot
+Content-Type: application/json
+
+{ "email": "{{email}}" }
+
+### Restablecer la contraseña con el código (RF-05.2): pon el código en @otp
+POST {{baseUrl}}/auth/password/reset
+Content-Type: application/json
+
+{ "email": "{{email}}", "otp": "{{otp}}", "newPassword": "{{password}}" }
+
+### Cerrar sesión (RF-04.4)
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{accessToken}}
