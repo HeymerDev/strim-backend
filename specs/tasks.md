@@ -1,7 +1,7 @@
 # Strim · Backend — Tareas
 
 > **SDD fase 3 de 3** (Requerimientos → Diseño → Tareas)
-> Estado: **borrador para revisión** · Fecha: 2026-10-18
+> Estado: **aprobado**, en implementación · Fecha: 2026-10-18
 > Parte de [requirements.md](requirements.md) v2 y [design.md](design.md), ambos aprobados.
 
 **Cómo se usa este documento**
@@ -14,14 +14,14 @@
 
 ## Fase 0 · Preparación
 
-- [ ] **0.1 [tú] Proyecto de Supabase**
+- [x] **0.1 [tú] Proyecto de Supabase** · proyecto `strim` (efqygfvcnkfxilubxrwy) creado con el MCP
   - Crear el proyecto y configurarlo según la sección 12 del diseño: correo con confirmación, OTP de 6 dígitos que vence en 600 s, plantillas con `{{ .Token }}` y contraseña mínima de 8.
   - Pasarme (o pegar en `backend/.env` cuando exista) `SUPABASE_URL`, las dos claves y la cadena del Session pooler.
   - _Diseño §12_
 
-- [ ] **0.2 [tú] SMTP propio**
+- [x] **0.2 [tú] SMTP propio** · Gmail con contraseña de aplicación
   - Crear una cuenta en Resend (u otro SMTP) y configurarla en Supabase.
-  - Mientras tanto se puede probar con el correo por defecto de Supabase, que solo envía a los miembros del equipo del proyecto.
+  - **Obligatorio antes de probar la Fase 2:** sin SMTP propio Supabase no deja editar las plantillas, y el correo llega con un enlace en vez del código. Sin dominio propio, la opción más simple es Gmail con una contraseña de aplicación.
   - _Requerimientos §8_
 
 - [ ] **0.3 [tú] Herramientas locales**
@@ -51,7 +51,7 @@
     - Una ruta inventada responde 404 con el formato `{ error: { code, message } }`.
   - _RNF-05, RNF-06, RNF-07, RNF-09, RNF-12_
 
-- [ ] **4. Base de datos y migraciones** · código listo y probado en un Postgres local; falta correrlo en tu Supabase
+- [x] **4. Base de datos y migraciones**
   - `src/database/index.ts`: Sequelize con `DATABASE_URL` y SSL.
   - `src/database/migrate.ts`: CLI de Umzug con `up` y `down`.
   - Migraciones `001-profiles`, `002-channels` y `003-chat-messages`, con FK a `auth.users`, CHECK del username, enum `channel_status`, índice del chat y RLS en las tres tablas.
@@ -67,7 +67,7 @@
   - **Verificación:** `npm run typecheck` pasa, y el servidor arranca y registra los modelos sin errores.
   - _RF-09.1, RNF-01_
 
-- [ ] **6. Clientes de Supabase y bucket de avatares** · código listo; falta probarlo con tu Supabase
+- [x] **6. Clientes de Supabase y bucket de avatares**
   - `src/config/supabase.ts`: `supabaseAdmin` y `createPublicClient()`.
   - Al arrancar, el servidor crea el bucket público `avatars` si no existe (2 MB, JPG/PNG/WebP).
   - **Verificación:** después del primer arranque, el bucket `avatars` aparece en Storage. Un segundo arranque no da error.
@@ -75,7 +75,7 @@
 
 ## Fase 2 · Cuentas
 
-- [ ] **7. Registro y verificación con OTP**
+- [x] **7. Registro y verificación con OTP**
   - `src/validators/auth.ts`: `emailSchema`, `usernameSchema` (formato y reservados) y `passwordSchema` (RNF-04).
   - `src/middlewares/rateLimits.ts`: `authLimiter`, de 10 peticiones por minuto por IP.
   - `src/controllers/auth.controller.ts`: `register`, `verifyEmail` y `resendOtp`, siguiendo los flujos de la sección 5.3 del diseño.
@@ -91,7 +91,7 @@
     - Dos reenvíos seguidos: el segundo responde `TOO_MANY_REQUESTS`.
   - _RF-01, RF-02, RNF-04_
 
-- [ ] **8. Login, sesión y `GET /api/me`**
+- [x] **8. Login, sesión y `GET /api/me`**
   - `login`, `refresh` y `logout` en el controlador de auth.
   - `src/middlewares/requireAuth.ts` (diseño §5.2).
   - `src/controllers/me.controller.ts`: `getMe`. `src/routes/me.routes.ts`.
@@ -102,7 +102,7 @@
     - Después de `logout`, el refresh token anterior ya no sirve.
   - _RF-03, RF-04_
 
-- [ ] **9. Recuperar la contraseña**
+- [x] **9. Recuperar la contraseña**
   - `forgotPassword` y `resetPassword` en el controlador de auth.
   - **Verificación:**
     - `forgot` responde lo mismo para un correo que existe y para uno que no.
@@ -111,7 +111,7 @@
     - Un código incorrecto responde `INVALID_OTP`.
   - _RF-05_
 
-- [ ] **10. Editar el perfil y el avatar**
+- [x] **10. Editar el perfil y el avatar**
   - `updateMe` (PATCH): display name, bio y username, con la regla `CHANNEL_LIVE` cuando el canal no está `offline`.
   - `src/middlewares/upload.ts` (multer: memoria, 2 MB, tres tipos) y `uploadAvatar` (diseño §6, sección "Avatar").
   - **Verificación:**
@@ -121,7 +121,7 @@
     - Un PDF, o una imagen de 3 MB, responde `INVALID_FILE`.
   - _RF-06_
 
-- [ ] **11. Cambiar la contraseña**
+- [x] **11. Cambiar la contraseña**
   - `sensitiveLimiter`: 5 fallos cada 15 min por usuario.
   - Una función que comprueba la contraseña actual y cierra la sesión de prueba (diseño §5.3).
   - `changePassword` (PUT `/api/me/password`).

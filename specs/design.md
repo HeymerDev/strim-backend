@@ -448,8 +448,10 @@ Los controladores lanzan `AppError(status, code, message?, details?)`, y `errorH
 | `EMAIL_TAKEN` | 409 | Ese correo ya está registrado. |
 | `USERNAME_TAKEN` | 409 | Ese nombre de usuario ya está en uso. |
 | `CHANNEL_LIVE` | 409 | No puedes hacer esto mientras tu stream está activo. |
+| `PAYLOAD_TOO_LARGE` | 413 | La petición es demasiado grande. |
 | `TOO_MANY_REQUESTS` | 429 | Demasiados intentos. Espera un momento. |
 | `INTERNAL_ERROR` | 500 | Algo salió mal. |
+| `EMAIL_NOT_SENT` | 503 | No pudimos enviar el correo. Intenta de nuevo en unos minutos. |
 
 Errores que solo aparecen en el socket:
 - `AUTH_REQUIRED`: Inicia sesión para comentar.
@@ -494,7 +496,7 @@ Los nombres de los menús pueden variar un poco según la versión del panel.
 1. Crear el proyecto y copiar la URL, las dos claves y la cadena de conexión del Session pooler.
 2. **Authentication → Providers → Email:** proveedor activado, "Confirm email" activado, contraseña mínima de 8 caracteres, OTP de 6 dígitos y vencimiento de 600 s.
 3. **Authentication → Email Templates:** en "Confirm signup" y "Reset password", reemplazar el enlace por el código `{{ .Token }}`.
-4. **Authentication → SMTP Settings:** configurar un SMTP propio, por ejemplo Resend.
+4. **Authentication → Emails → SMTP Settings:** configurar un SMTP propio (por ejemplo Resend con dominio propio, o Gmail con contraseña de aplicación). Es obligatorio: sin él Supabase no deja editar las plantillas del paso 3.
 5. **Storage:** no hace falta crear nada a mano; el backend crea el bucket `avatars` al arrancar.
 
 ## 13. Scripts y dependencias
