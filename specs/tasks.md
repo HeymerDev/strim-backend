@@ -134,7 +134,7 @@
 
 ## Fase 3 · Tiempo real (base)
 
-- [ ] **12. Socket.IO base**
+- [x] **12. Socket.IO base**
   - `src/sockets/index.ts`: Socket.IO en el mismo servidor HTTP, con CORS.
   - Middleware de conexión: sin token entra como anónimo; con token se valida con `getClaims`, se carga el perfil y el socket entra a la sala `user:<id>`; con token inválido se rechaza con `UNAUTHORIZED`.
   - `src/sockets/emit.ts`: `emitToChannel`, `emitToUser`, `getViewers(channelId)` y `disconnectUser(userId)`, para usarlas desde los controladores.
