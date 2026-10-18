@@ -4,6 +4,7 @@ import { createApp } from './app';
 import { env } from './config/env';
 import { ensureAvatarsBucket } from './config/supabase';
 import { closeDatabase, connectDatabase } from './database';
+import { initSockets } from './sockets';
 
 // Nombra el paso que falló al arrancar, para saber qué revisar en el .env.
 async function step(label: string, run: () => Promise<void>) {
@@ -27,13 +28,17 @@ async function main() {
     }
     process.exit(1);
   });
+  // Socket.IO comparte el puerto de la API.
+  const io = initSockets(server);
+
   server.listen(env.PORT, () => {
     console.log(`Strim API escuchando en http://localhost:${env.PORT}`);
   });
 
   const shutdown = (signal: string) => {
     console.log(`${signal} recibido, cerrando…`);
-    server.close(() => {
+    // io.close() también cierra el servidor HTTP.
+    io.close(() => {
       closeDatabase().finally(() => process.exit(0));
     });
   };
