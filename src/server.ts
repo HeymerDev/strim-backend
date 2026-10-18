@@ -19,6 +19,14 @@ async function main() {
   await step('Bucket de avatares en Supabase Storage (SUPABASE_URL / SUPABASE_SECRET_KEY)', ensureAvatarsBucket);
 
   const server = http.createServer(createApp());
+  server.on('error', (err: NodeJS.ErrnoException) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`El puerto ${env.PORT} ya está en uso: cierra el otro proceso o cambia PORT en .env.`);
+    } else {
+      console.error('Error del servidor HTTP:', err);
+    }
+    process.exit(1);
+  });
   server.listen(env.PORT, () => {
     console.log(`Strim API escuchando en http://localhost:${env.PORT}`);
   });

@@ -18,6 +18,7 @@ const catalog = {
   TOO_MANY_REQUESTS: { status: 429, message: 'Demasiados intentos. Espera un momento.' },
   RATE_LIMITED: { status: 429, message: 'Vas muy rápido.' },
   INTERNAL_ERROR: { status: 500, message: 'Algo salió mal.' },
+  EMAIL_NOT_SENT: { status: 503, message: 'No pudimos enviar el correo. Intenta de nuevo en unos minutos.' },
 } as const;
 
 export type ErrorCode = keyof typeof catalog;
