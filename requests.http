@@ -1,6 +1,7 @@
-# Pruebas manuales de la API de Strim (D6).
+# Pruebas manuales de la API de Strim (D6), en el orden de un uso real.
 # Con la extensión REST Client de VS Code: "Send Request" encima de cada petición.
-# Los tokens se toman solos de la respuesta de login / verify-email.
+# El accessToken se toma solo de la respuesta de "Login".
+# Antes: npm run media:up y npm run dev.
 
 @baseUrl = http://localhost:4000/api
 @email = tu-correo@ejemplo.com
@@ -12,22 +13,21 @@
 ### Salud
 GET {{baseUrl}}/health
 
-# ───────────── Cuentas (Fase 2) ─────────────
+# ───────────── 1. Cuenta ─────────────
 
-### Registro (RF-01): envía el OTP al correo
+### Registro (RF-01): envía el código al correo
 POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 { "email": "{{email}}", "username": "{{username}}", "password": "{{password}}" }
 
-### Reenviar el OTP (RF-02.3)
+### Reenviar el código (RF-02.3): espera 60 s entre envíos
 POST {{baseUrl}}/auth/resend-otp
 Content-Type: application/json
 
 { "email": "{{email}}" }
 
-### Verificar el correo con el OTP (RF-02): pon el código en @otp
-# @name verify
+### Verificar el correo (RF-02): pon el código que llegó en @otp
 POST {{baseUrl}}/auth/verify-email
 Content-Type: application/json
 
@@ -43,15 +43,11 @@ Content-Type: application/json
 @accessToken = {{login.response.body.accessToken}}
 @refreshToken = {{login.response.body.refreshToken}}
 
-### Renovar tokens (RF-04.3)
-POST {{baseUrl}}/auth/refresh
-Content-Type: application/json
-
-{ "refreshToken": "{{refreshToken}}" }
-
 ### Mis datos (RF-04.5)
 GET {{baseUrl}}/me
 Authorization: Bearer {{accessToken}}
+
+# ───────────── 2. Perfil ─────────────
 
 ### Editar perfil (RF-06)
 PATCH {{baseUrl}}/me
@@ -72,31 +68,7 @@ Content-Type: image/png
 < ./avatar.png
 --StrimBoundary--
 
-### Cambiar contraseña (RF-07)
-PUT {{baseUrl}}/me/password
-Authorization: Bearer {{accessToken}}
-Content-Type: application/json
-
-{ "currentPassword": "{{password}}", "newPassword": "{{newPassword}}" }
-
-### Pedir código para recuperar la contraseña (RF-05.1)
-POST {{baseUrl}}/auth/password/forgot
-Content-Type: application/json
-
-{ "email": "{{email}}" }
-
-### Restablecer la contraseña con el código (RF-05.2): pon el código en @otp
-POST {{baseUrl}}/auth/password/reset
-Content-Type: application/json
-
-{ "email": "{{email}}", "otp": "{{otp}}", "newPassword": "{{password}}" }
-
-### Cerrar sesión (RF-04.4)
-POST {{baseUrl}}/auth/logout
-Authorization: Bearer {{accessToken}}
-
-# ───────────── Streaming (Fase 4) ─────────────
-# MediaMTX tiene que estar arriba: npm run media:up
+# ───────────── 3. Transmitir ─────────────
 
 ### Dashboard: datos para OBS (RF-09.2)
 GET {{baseUrl}}/stream
@@ -116,6 +88,23 @@ Content-Type: application/json
 
 { "title": "Nuevo título" }
 
+# ───────────── 4. Ver (público, sin sesión) ─────────────
+
+### Canal público (RF-13): playbackUrl es el HLS para el reproductor
+GET {{baseUrl}}/channels/{{username}}
+
+### Canales en vivo (RF-17)
+GET {{baseUrl}}/channels/live
+
+# El chat va por Socket.IO y no se prueba desde este archivo.
+# Desde la consola del navegador, con socket.io-client cargado:
+#   const s = io('http://localhost:4000', { auth: { token: '<accessToken>' } }) // sin auth = anónimo
+#   s.on('chat:message', console.log)
+#   s.emit('chat:join', { username: 'streamer1' }, console.log)
+#   s.emit('chat:send', { content: 'hola' }, console.log)
+
+# ───────────── 5. Terminar el stream ─────────────
+
 ### Finalizar stream (RF-10.3): corta OBS
 POST {{baseUrl}}/stream/stop
 Authorization: Bearer {{accessToken}}
@@ -124,8 +113,42 @@ Authorization: Bearer {{accessToken}}
 POST {{baseUrl}}/stream/key
 Authorization: Bearer {{accessToken}}
 
-### Canal público (RF-13)
-GET {{baseUrl}}/channels/{{username}}
+# ───────────── 6. Contraseña y sesión ─────────────
 
-### Canales en vivo (RF-17)
-GET {{baseUrl}}/channels/live
+### Cambiar contraseña (RF-07)
+PUT {{baseUrl}}/me/password
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "currentPassword": "{{password}}", "newPassword": "{{newPassword}}" }
+
+### Pedir código para recuperar la contraseña (RF-05.1)
+POST {{baseUrl}}/auth/password/forgot
+Content-Type: application/json
+
+{ "email": "{{email}}" }
+
+### Restablecer la contraseña con el código (RF-05.2): pon el código en @otp
+POST {{baseUrl}}/auth/password/reset
+Content-Type: application/json
+
+{ "email": "{{email}}", "otp": "{{otp}}", "newPassword": "{{password}}" }
+
+### Renovar tokens (RF-04.3)
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{ "refreshToken": "{{refreshToken}}" }
+
+### Cerrar sesión (RF-04.4)
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{accessToken}}
+
+# ───────────── 7. Borrar la cuenta ─────────────
+
+### Borrar la cuenta (RF-08): definitivo, pide la contraseña actual
+DELETE {{baseUrl}}/me
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "password": "{{password}}" }

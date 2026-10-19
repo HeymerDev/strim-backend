@@ -1,7 +1,7 @@
 # Strim · Backend — Tareas
 
 > **SDD fase 3 de 3** (Requerimientos → Diseño → Tareas)
-> Estado: **aprobado**, en implementación · Fecha: 2026-10-18
+> Estado: **completado**: todas las tareas verificadas · Fecha: 2026-10-18
 > Parte de [requirements.md](requirements.md) v2 y [design.md](design.md), ambos aprobados.
 
 **Cómo se usa este documento**
@@ -24,7 +24,7 @@
   - **Obligatorio antes de probar la Fase 2:** sin SMTP propio Supabase no deja editar las plantillas, y el correo llega con un enlace en vez del código. Sin dominio propio, la opción más simple es Gmail con una contraseña de aplicación.
   - _Requerimientos §8_
 
-- [ ] **0.3 [tú] Herramientas locales**
+- [ ] **0.3 [tú] Herramientas locales** · Docker Desktop listo; falta probar con OBS de verdad (las pruebas usaron ffmpeg)
   - Docker Desktop abierto y OBS instalado.
 
 ## Fase 1 · Base del proyecto
@@ -228,7 +228,7 @@
 
 ## Fase 6 · Cierre
 
-- [ ] **21. Borrar la cuenta**
+- [x] **21. Borrar la cuenta**
   - `deleteMe` (DELETE `/api/me`), con `sensitiveLimiter` y los pasos de la sección 5.3 del diseño.
   - **Verificación:**
     - Con la contraseña incorrecta responde `INVALID_CURRENT_PASSWORD` y no borra nada.
@@ -242,7 +242,7 @@
     - Se puede registrar otra cuenta con el mismo correo y el mismo username.
   - _RF-08_
 
-- [ ] **22. Pruebas completas y README**
+- [x] **22. Pruebas completas y README**
   - Completar `requests.http` con todos los endpoints, en el orden de un uso real.
   - `backend/README.md` corto: requisitos, cómo llenar el `.env`, `npm run media:up`, `npm run db:migrate`, `npm run dev` y cómo configurar OBS.
   - **Verificación** (de punta a punta):
