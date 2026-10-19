@@ -15,7 +15,8 @@ export function zodDetails(error: ZodError): Record<string, string> {
   return details;
 }
 
-function toAppError(err: unknown): AppError | null {
+// Errores conocidos → AppError. null = error inesperado (500). También lo usa el socket.
+export function toAppError(err: unknown): AppError | null {
   if (err instanceof AppError) return err;
   if (err instanceof ZodError) return new AppError('VALIDATION_ERROR', undefined, zodDetails(err));
   if (err instanceof MulterError) return new AppError('INVALID_FILE');

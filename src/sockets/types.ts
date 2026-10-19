@@ -3,7 +3,9 @@ import type { ChannelStatus, ChatMessageDTO, PublicChannelDTO } from '../models'
 import type { ErrorCode } from '../utils/AppError';
 
 // Respuesta (ack) de cada evento del cliente (diseño §7).
-export type AckResponse<T> = ({ ok: true } & T) | { ok: false; error: { code: ErrorCode; message: string } };
+export type AckResponse<T> =
+  | ({ ok: true } & T)
+  | { ok: false; error: { code: ErrorCode; message: string; details?: unknown } };
 export type Ack<T> = (response: AckResponse<T>) => void;
 
 // Lo que manda el cliente es dato no confiable: los payloads se validan con zod en el controlador.
