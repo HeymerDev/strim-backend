@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import { env, isProduction } from './config/env';
 import { errorHandler, notFound } from './middlewares/errorHandler';
 import { apiRouter } from './routes';
+import { internalRouter } from './routes/internal.routes';
 
 // Sin query string en el log: la ruta interna de MediaMTX lleva el secreto ahí.
 morgan.token('path', (req) => (req as express.Request).originalUrl.split('?')[0]);
@@ -19,6 +20,7 @@ export function createApp() {
   app.use(morgan(':method :path :status :response-time ms', { skip: () => env.NODE_ENV === 'test' }));
 
   app.use('/api', apiRouter);
+  app.use('/internal', internalRouter);
 
   app.use(notFound);
   app.use(errorHandler);
