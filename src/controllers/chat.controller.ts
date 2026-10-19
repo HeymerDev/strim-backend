@@ -1,3 +1,4 @@
+import { ForeignKeyConstraintError } from 'sequelize';
 import { Channel, ChatMessage, type ChatMessageDTO, Profile, type PublicChannelDTO } from '../models';
 import { channelRoom, emitToChannel, getViewers, markViewersChanged } from '../sockets/emit';
 import type { StrimSocket } from '../sockets/types';
@@ -72,7 +73,17 @@ export async function sendMessage(socket: StrimSocket, payload: unknown): Promis
   lastMessageAt.set(userId, now);
   pruneRateLimits(now);
 
-  const created = await ChatMessage.create({ channelId, userId, content });
+  let created: ChatMessage;
+  try {
+    created = await ChatMessage.create({ channelId, userId, content });
+  } catch (err) {
+    // El canal se borró justo mientras se enviaba el mensaje (RF-08).
+    if (err instanceof ForeignKeyConstraintError) {
+      socket.data.channelId = null;
+      throw new AppError('NOT_IN_ROOM');
+    }
+    throw err;
+  }
   const saved = await ChatMessage.findByPk(created.id, { include: [{ model: Profile, as: 'author' }] });
   const message = saved!.toMessage();
 
