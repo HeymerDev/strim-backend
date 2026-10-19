@@ -14,5 +14,8 @@ export const changePasswordBody = z.object({
   newPassword: passwordSchema,
 });
 
+export const deleteMeBody = z.object({ password: anyPasswordSchema });
+
 export type UpdateMeBody = z.infer<typeof updateMeBody>;
+export type DeleteMeBody = z.infer<typeof deleteMeBody>;
 export type ChangePasswordBody = z.infer<typeof changePasswordBody>;

@@ -1,9 +1,11 @@
 import type { RequestHandler } from 'express';
 import { AVATARS_BUCKET, createPublicClient, supabaseAdmin } from '../config/supabase';
 import { authOf } from '../middlewares/requireAuth';
+import { closeChannelRoom, disconnectUser } from '../sockets/emit';
 import { AppError } from '../utils/AppError';
 import { fromAuthError, isRateLimited } from '../utils/authErrors';
-import type { ChangePasswordBody, UpdateMeBody } from '../validators/me';
+import type { ChangePasswordBody, DeleteMeBody, UpdateMeBody } from '../validators/me';
+import { kickQuietly } from './stream.controller';
 
 // Firma de los primeros bytes de cada formato: el tipo que manda el cliente no basta.
 const AVATAR_FORMATS = {
@@ -81,5 +83,34 @@ export const changePassword: RequestHandler = async (req, res) => {
   const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, { password: newPassword });
   if (error) throw fromAuthError(error);
 
+  res.status(204).end();
+};
+
+// RF-08: borrado definitivo de la cuenta, confirmado con la contraseña.
+export const deleteMe: RequestHandler = async (req, res) => {
+  const { userId, email, profile } = authOf(req);
+  const { password } = req.body as DeleteMeBody;
+  await verifyCurrentPassword(email, password);
+
+  // Si estaba transmitiendo: offline primero (MediaMTX rechaza la reconexión de OBS) y luego se corta la señal.
+  const channel = profile.channel!;
+  if (channel.status !== 'offline') {
+    await channel.update({ status: 'offline', liveStartedAt: null });
+    await kickQuietly(profile.username);
+  }
+  closeChannelRoom(profile.id);
+
+  // El avatar se intenta borrar, pero un fallo de Storage no impide borrar la cuenta.
+  try {
+    await removeAvatars(userId);
+  } catch (err) {
+    console.warn(`[me] no se pudo borrar el avatar de ${userId}: ${err instanceof Error ? err.message : err}`);
+  }
+
+  // Postgres borra en cascada el perfil, el canal y los mensajes (RF-08.1).
+  const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+  if (error) throw fromAuthError(error);
+
+  disconnectUser(userId);
   res.status(204).end();
 };

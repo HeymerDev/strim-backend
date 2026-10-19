@@ -48,6 +48,18 @@ export function flushViewerCounts() {
   changedChannels.clear();
 }
 
+// El canal ya no existe: avisa a su sala y saca a todos (RF-08.4).
+// Se recorren los sockets locales porque también hay que limpiar socket.data.channelId.
+export function closeChannelRoom(channelId: string) {
+  if (!io) return;
+  emitToChannel(channelId, 'channel:deleted', {});
+  for (const socket of io.sockets.sockets.values()) {
+    if (socket.data.channelId !== channelId) continue;
+    socket.leave(channelRoom(channelId));
+    socket.data.channelId = null;
+  }
+}
+
 // Cierra todas las conexiones de un usuario (RF-08.5).
 export function disconnectUser(userId: string) {
   io?.in(userRoom(userId)).disconnectSockets(true);
