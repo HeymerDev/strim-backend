@@ -146,7 +146,7 @@
 
 ## Fase 4 · Streaming
 
-- [ ] **13. MediaMTX en Docker**
+- [x] **13. MediaMTX en Docker**
   - `docker-compose.yml` y `mediamtx/mediamtx.yml` (diseño §8.1 y §8.2), con la última versión 1.x estable fijada. Confirmar los nombres de las claves para esa versión.
   - `src/config/mediamtx.ts`: `listReadyPaths()` y `kickPublisher(username)`.
   - **Verificación:**
@@ -155,7 +155,7 @@
     - El puerto 9997 no se ve desde otra máquina de la red.
   - _D7, RNF-10 · Diseño §8_
 
-- [ ] **14. Dashboard del stream**
+- [x] **14. Dashboard del stream**
   - `src/controllers/stream.controller.ts` y `src/routes/stream.routes.ts`:
     - `GET /api/stream`.
     - `POST /api/stream/key`, con `CHANNEL_LIVE` si el canal no está `offline`.
@@ -169,7 +169,7 @@
     - Regenerar la clave en `waiting` responde `CHANNEL_LIVE`.
   - _RF-09, RF-10_
 
-- [ ] **15. Autorizar la señal de OBS**
+- [x] **15. Autorizar la señal de OBS**
   - `src/middlewares/internalSecret.ts`, `src/controllers/mediamtx.controller.ts` y `src/routes/internal.routes.ts`, montadas en `/internal` (diseño §8.3).
   - **Verificación con OBS:**
     - Con el canal en `offline`, OBS es rechazado.
@@ -179,7 +179,7 @@
     - Llamar a la ruta interna sin el secreto responde 401.
   - _RF-11_
 
-- [ ] **16. Monitor de señales**
+- [x] **16. Monitor de señales**
   - `src/jobs/streamMonitor.ts` (diseño §8.4). Arranca desde `server.ts` con una primera pasada inmediata.
   - **Verificación:**
     - Con OBS transmitiendo, el canal pasa a `live` en 3 s o menos.
@@ -189,7 +189,7 @@
     - Si se apaga MediaMTX, el backend no cambia ningún estado y solo lo registra en el log.
   - _RF-12, RF-10.3_
 
-- [ ] **17. Canales públicos**
+- [x] **17. Canales públicos**
   - `src/controllers/channels.controller.ts` y `src/routes/channels.routes.ts`: `GET /api/channels/live` (antes que `/:username`) y `GET /api/channels/:username`.
   - **Verificación:**
     - Un canal en vivo devuelve `isLive: true` y su `playbackUrl` (que reproduce en VLC).

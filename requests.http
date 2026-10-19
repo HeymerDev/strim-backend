@@ -94,3 +94,38 @@ Content-Type: application/json
 ### Cerrar sesión (RF-04.4)
 POST {{baseUrl}}/auth/logout
 Authorization: Bearer {{accessToken}}
+
+# ───────────── Streaming (Fase 4) ─────────────
+# MediaMTX tiene que estar arriba: npm run media:up
+
+### Dashboard: datos para OBS (RF-09.2)
+GET {{baseUrl}}/stream
+Authorization: Bearer {{accessToken}}
+
+### Iniciar stream (RF-10.1): después de esto, OBS puede conectarse
+POST {{baseUrl}}/stream/start
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "title": "Mi primer stream" }
+
+### Cambiar el título (RF-10.4)
+PATCH {{baseUrl}}/stream
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "title": "Nuevo título" }
+
+### Finalizar stream (RF-10.3): corta OBS
+POST {{baseUrl}}/stream/stop
+Authorization: Bearer {{accessToken}}
+
+### Regenerar la stream key (RF-09.3): solo con el canal offline
+POST {{baseUrl}}/stream/key
+Authorization: Bearer {{accessToken}}
+
+### Canal público (RF-13)
+GET {{baseUrl}}/channels/{{username}}
+
+### Canales en vivo (RF-17)
+GET {{baseUrl}}/channels/live
