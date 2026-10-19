@@ -1,0 +1,34 @@
+# Configuración de MediaMTX 1.21 para Strim (diseño §8.2).
+# Lo que no aparece aquí usa el valor por defecto de MediaMTX.
+
+logLevel: info
+
+# Antes de aceptar una señal, MediaMTX llama al backend (RF-11).
+# authHTTPAddress llega desde docker-compose.yml (MTX_AUTHHTTPADDRESS) con el secreto del .env.
+authMethod: http
+authHTTPExclude:
+  - action: read # ver es público (RF-11.2)
+  - action: playback
+  - action: api # la API solo se publica en 127.0.0.1
+  - action: metrics
+  - action: pprof
+
+api: true
+apiAddress: :9997
+
+rtmp: true
+rtmpAddress: :1935
+
+hls: true
+hlsAddress: :8888
+hlsAllowOrigins: ["*"] # los streams son públicos
+
+# Strim solo usa RTMP de entrada y HLS de salida.
+rtsp: false
+webrtc: false
+srt: false
+moq: false
+
+paths:
+  # Solo se acepta live/<username>: cualquier otra ruta se rechaza.
+  "~^live/[a-z0-9_]{3,20}$": {}

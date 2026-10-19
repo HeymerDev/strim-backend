@@ -1,0 +1,19 @@
+# MediaMTX: recibe la señal RTMP de OBS y la sirve en HLS (diseño §8.1).
+# Lee PORT y MEDIAMTX_SECRET del mismo backend/.env.
+name: strim
+
+services:
+  mediamtx:
+    image: bluenviron/mediamtx:1.21.2
+    restart: unless-stopped
+    ports:
+      - "1935:1935" # RTMP para OBS
+      - "8888:8888" # HLS para los navegadores
+      - "127.0.0.1:9997:9997" # API sin autenticación: solo accesible desde esta máquina
+    volumes:
+      - ./mediamtx/mediamtx.yml:/mediamtx.yml:ro
+    environment:
+      # Antes de aceptar una señal, MediaMTX le pregunta al backend (RF-11).
+      MTX_AUTHHTTPADDRESS: http://host.docker.internal:${PORT:-4000}/internal/mediamtx/auth?secret=${MEDIAMTX_SECRET:?falta MEDIAMTX_SECRET en backend/.env}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
