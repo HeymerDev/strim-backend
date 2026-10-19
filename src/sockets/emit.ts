@@ -28,9 +28,24 @@ export function emitToUser<E extends keyof ServerToClientEvents>(
   io?.to(userRoom(userId)).emit(event, ...args);
 }
 
-// Conexiones en la sala de un canal, con o sin sesión (RF-16).
+// Conexiones en la sala de un canal, con o sin sesión (RF-16.1).
 export function getViewers(channelId: string): number {
   return io?.sockets.adapter.rooms.get(channelRoom(channelId))?.size ?? 0;
+}
+
+// Salas cuyo número de espectadores cambió desde el último aviso.
+const changedChannels = new Set<string>();
+
+export function markViewersChanged(channelId: string) {
+  changedChannels.add(channelId);
+}
+
+// Avisa el número de espectadores solo a las salas que cambiaron (RF-16.2). Corre cada 5 s.
+export function flushViewerCounts() {
+  for (const channelId of changedChannels) {
+    emitToChannel(channelId, 'viewers:count', { viewers: getViewers(channelId) });
+  }
+  changedChannels.clear();
 }
 
 // Cierra todas las conexiones de un usuario (RF-08.5).
