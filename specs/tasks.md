@@ -201,7 +201,7 @@
 
 ## Fase 5 · Chat
 
-- [ ] **18. Unirse a un chat y ver el historial**
+- [x] **18. Unirse a un chat y ver el historial**
   - `src/controllers/chat.controller.ts`: `join` y `leave`, conectados en `sockets/index.ts`, con validación zod del payload.
   - **Verificación:**
     - `chat:join` devuelve el canal y hasta 50 mensajes, del más antiguo al más reciente.
@@ -210,7 +210,7 @@
     - Funciona aunque el canal no esté en vivo.
   - _RF-14_
 
-- [ ] **19. Enviar mensajes**
+- [x] **19. Enviar mensajes**
   - `send` en el controlador del chat, con las reglas de la sección 7 del diseño, en orden.
   - **Verificación:**
     - Un anónimo recibe `AUTH_REQUIRED` y nadie ve su mensaje.
@@ -220,7 +220,7 @@
     - `<b>hola</b>` se guarda y llega tal cual, como texto.
   - _RF-15_
 
-- [ ] **20. Contador de espectadores**
+- [x] **20. Contador de espectadores**
   - Marcar las salas cambiadas en `join`, `leave` y `disconnect`, y emitir `viewers:count` cada 5 s solo a esas salas.
   - Usar `getViewers` en las respuestas REST.
   - **Verificación:** al abrir y cerrar pestañas, el número cambia en el siguiente aviso (como mucho 5 s) y coincide con `GET /api/channels/:username`.
