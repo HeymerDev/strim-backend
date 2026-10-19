@@ -4,6 +4,7 @@ import { createApp } from './app';
 import { env } from './config/env';
 import { ensureAvatarsBucket } from './config/supabase';
 import { closeDatabase, connectDatabase } from './database';
+import { startStreamMonitor } from './jobs/streamMonitor';
 import { initSockets } from './sockets';
 
 // Nombra el paso que falló al arrancar, para saber qué revisar en el .env.
@@ -35,8 +36,12 @@ async function main() {
     console.log(`Strim API escuchando en http://localhost:${env.PORT}`);
   });
 
+  // Sincroniza los estados con MediaMTX al arrancar y cada 3 s (RF-12).
+  const stopMonitor = startStreamMonitor();
+
   const shutdown = (signal: string) => {
     console.log(`${signal} recibido, cerrando…`);
+    stopMonitor();
     // io.close() también cierra el servidor HTTP.
     io.close(() => {
       closeDatabase().finally(() => process.exit(0));
