@@ -21,7 +21,7 @@ La especificación con la que se construyó está en [`specs/`](specs/): [requer
 11. [Errores](#11-errores)
 12. [Seguridad](#12-seguridad)
 13. [Scripts](#13-scripts)
-14. [Pruebas manuales](#14-pruebas-manuales)
+14. [Pruebas](#14-pruebas)
 15. [Problemas comunes](#15-problemas-comunes)
 
 ---
@@ -128,6 +128,8 @@ backend/
 ├── mediamtx/mediamtx.yml       configuración de MediaMTX
 ├── supabase/email-templates/   plantillas de correo con el código OTP
 ├── requests.http               pruebas manuales de la API
+├── test/                       pruebas unitarias (Jest): unit/, helpers/ y setup-env.ts
+├── jest.config.js              configuración de Jest (ts-jest, con tsconfig.test.json)
 ├── specs/                      requerimientos, diseño y tareas
 ├── .env.example
 └── src/
@@ -1183,12 +1185,31 @@ Catálogo, en [`src/utils/AppError.ts`](src/utils/AppError.ts):
 | `npm run build` | Compila a `dist/` con `tsc`. |
 | `npm start` | Ejecuta `dist/server.js`. |
 | `npm run typecheck` | Revisa los tipos sin compilar. |
+| `npm test` | Corre las pruebas unitarias con Jest. |
+| `npm run test:watch` | Las vuelve a correr con cada cambio. |
+| `npm run test:coverage` | Las corre y muestra la cobertura (genera `coverage/`, que git ignora). |
 | `npm run db:migrate` | Aplica las migraciones pendientes. |
 | `npm run db:rollback` | Revierte la última migración. |
 | `npm run media:up` | Levanta MediaMTX (`docker compose up -d`). |
 | `npm run media:down` | Apaga MediaMTX (`docker compose down`). |
 
-## 14. Pruebas manuales
+## 14. Pruebas
+
+### Pruebas unitarias (Jest)
+
+- **Dónde están:** en [`test/unit/`](test/unit/), con el mismo árbol que `src/`. Cubren utilidades, validadores, middlewares, modelos, controladores, el cliente de MediaMTX, el monitor de señales y el chat.
+- **Sin servicios externos:** no usan red, ni Supabase, ni Postgres, ni MediaMTX. Supabase, los modelos de Sequelize, `fetch` y los avisos del socket se reemplazan con mocks.
+- **Entorno:** [`test/setup-env.ts`](test/setup-env.ts) define variables de entorno falsas antes de importar el código, así nunca se usa el `.env` real.
+- **Ayudas:** [`test/helpers/`](test/helpers/) tiene peticiones, sockets y modelos falsos, y dobles de Supabase.
+- **Configuración:** [`jest.config.js`](jest.config.js) y [`tsconfig.test.json`](tsconfig.test.json), con ts-jest.
+
+```bash
+npm test                                                  # todas
+npx jest test/unit/controllers/auth.controller.test.ts    # un archivo
+npm run test:coverage                                     # con cobertura
+```
+
+### Pruebas manuales
 
 [`requests.http`](requests.http) tiene todas las rutas en el orden de un uso real: cuenta, perfil, transmitir, ver, terminar el stream, contraseña y sesión, y borrar la cuenta. Se usa con la extensión **REST Client** de VS Code:
 
